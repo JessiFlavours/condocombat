@@ -1,7 +1,7 @@
 """Tests for SQLAlchemy ORM models — TDD approach."""
 
-import pytest
 from sqlalchemy import select
+import pytest
 
 from app.models import (
     Apartamento,

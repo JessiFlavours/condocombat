@@ -1,5 +1,5 @@
-import pytest
 from httpx import AsyncClient, ASGITransport
+import pytest
 
 from app.auth.utils import create_access_token
 from app.main import app

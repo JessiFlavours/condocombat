@@ -1,9 +1,9 @@
 """WebSocket connection manager with broadcast and heartbeat."""
 
+from dataclasses import dataclass, field
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
 
 from fastapi import WebSocket
 

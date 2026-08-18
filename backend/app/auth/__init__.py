@@ -1,3 +1,4 @@
+from app.auth.dependencies import get_current_user, oauth2_scheme
 from app.auth.schemas import LoginRequest, TokenResponse, UserRead
 from app.auth.utils import (
     verify_password,
@@ -6,7 +7,6 @@ from app.auth.utils import (
     decode_access_token,
     MOCK_USERS,
 )
-from app.auth.dependencies import get_current_user, oauth2_scheme
 
 __all__ = [
     "LoginRequest",

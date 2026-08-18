@@ -1,5 +1,5 @@
-import asyncio
 from logging.config import fileConfig
+import asyncio
 
 from alembic import context
 from sqlalchemy import pool

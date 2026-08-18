@@ -1,7 +1,7 @@
 """Tests for WebSocket /ws/ocorrencias feed."""
 
-import json
 from datetime import datetime, timedelta, timezone
+import json
 
 import pytest
 from fastapi.testclient import TestClient
