@@ -1,4 +1,8 @@
-from app.schemas.apartamento import ApartamentoCreate, ApartamentoRead, ApartamentoUpdate
+from app.schemas.apartamento import (
+    ApartamentoCreate,
+    ApartamentoRead,
+    ApartamentoUpdate,
+)
 from app.schemas.condominio import CondominioCreate, CondominioRead, CondominioUpdate
 from app.schemas.morador import MoradorCreate, MoradorRead, MoradorUpdate
 from app.schemas.ocorrencia import OcorrenciaCreate, OcorrenciaRead, OcorrenciaUpdate

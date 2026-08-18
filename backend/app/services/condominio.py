@@ -7,11 +7,11 @@ from app.repositories.condominio import CondominioRepository
 from app.schemas.condominio import CondominioCreate, CondominioUpdate
 
 
-class CondominioJaExiste(Exception):
+class CondominioJaExisteError(Exception):
     """CNPJ já cadastrado para outro condomínio."""
 
 
-class CondominioNaoEncontrado(Exception):
+class CondominioNaoEncontradoError(Exception):
     """Condomínio não encontrado."""
 
 
@@ -25,7 +25,7 @@ class CondominioService:
         if data.cnpj:
             existente = await self.repository.get_by_cnpj(data.cnpj)
             if existente is not None:
-                raise CondominioJaExiste(
+                raise CondominioJaExisteError(
                     f"CNPJ {data.cnpj} já cadastrado para '{existente.nome}'"
                 )
         return await self.repository.create(data)
@@ -36,23 +36,21 @@ class CondominioService:
     async def buscar(self, condominio_id: int) -> Condominio:
         condominio = await self.repository.get_by_id(condominio_id)
         if condominio is None:
-            raise CondominioNaoEncontrado(
+            raise CondominioNaoEncontradoError(
                 f"Condomínio {condominio_id} não encontrado"
             )
         return condominio
 
-    async def atualizar(
-        self, condominio_id: int, data: CondominioUpdate
-    ) -> Condominio:
+    async def atualizar(self, condominio_id: int, data: CondominioUpdate) -> Condominio:
         if data.cnpj:
             existente = await self.repository.get_by_cnpj(data.cnpj)
             if existente is not None and existente.id != condominio_id:
-                raise CondominioJaExiste(
+                raise CondominioJaExisteError(
                     f"CNPJ {data.cnpj} já cadastrado para '{existente.nome}'"
                 )
         condominio = await self.repository.update(condominio_id, data)
         if condominio is None:
-            raise CondominioNaoEncontrado(
+            raise CondominioNaoEncontradoError(
                 f"Condomínio {condominio_id} não encontrado"
             )
         return condominio
@@ -60,6 +58,6 @@ class CondominioService:
     async def remover(self, condominio_id: int) -> None:
         removido = await self.repository.delete(condominio_id)
         if not removido:
-            raise CondominioNaoEncontrado(
+            raise CondominioNaoEncontradoError(
                 f"Condomínio {condominio_id} não encontrado"
             )

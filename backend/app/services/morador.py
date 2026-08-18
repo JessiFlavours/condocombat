@@ -2,15 +2,15 @@ from app.models.morador import Morador
 from app.repositories.morador import MoradorRepository
 
 
-class MoradorComCPFJaExiste(Exception):
+class MoradorComCPFJaExisteError(Exception):
     pass
 
 
-class MoradorComEmailJaExiste(Exception):
+class MoradorComEmailJaExisteError(Exception):
     pass
 
 
-class MoradorNaoEncontrado(Exception):
+class MoradorNaoEncontradoError(Exception):
     pass
 
 
@@ -29,11 +29,11 @@ class MoradorService:
     ) -> Morador:
         existente_cpf = await self.repo.get_by_cpf(cpf)
         if existente_cpf is not None:
-            raise MoradorComCPFJaExiste(f"CPF {cpf} já cadastrado")
+            raise MoradorComCPFJaExisteError(f"CPF {cpf} já cadastrado")
 
         existente_email = await self.repo.get_by_email(email)
         if existente_email is not None:
-            raise MoradorComEmailJaExiste(f"Email {email} já cadastrado")
+            raise MoradorComEmailJaExisteError(f"Email {email} já cadastrado")
 
         morador = Morador(
             nome=nome,
@@ -51,7 +51,7 @@ class MoradorService:
     async def buscar(self, morador_id: int) -> Morador:
         morador = await self.repo.get_by_id(morador_id)
         if morador is None:
-            raise MoradorNaoEncontrado(f"Morador {morador_id} não encontrado")
+            raise MoradorNaoEncontradoError(f"Morador {morador_id} não encontrado")
         return morador
 
     async def listar_por_apartamento(self, apartamento_id: int) -> list[Morador]:
@@ -60,24 +60,28 @@ class MoradorService:
     async def atualizar(self, morador_id: int, dados: dict) -> Morador:
         existente = await self.repo.get_by_id(morador_id)
         if existente is None:
-            raise MoradorNaoEncontrado(f"Morador {morador_id} não encontrado")
+            raise MoradorNaoEncontradoError(f"Morador {morador_id} não encontrado")
 
         if "cpf" in dados and dados["cpf"] != existente.cpf:
             outro = await self.repo.get_by_cpf(dados["cpf"])
             if outro is not None:
-                raise MoradorComCPFJaExiste(f"CPF {dados['cpf']} já pertence a outro morador")
+                raise MoradorComCPFJaExisteError(
+                    f"CPF {dados['cpf']} já pertence a outro morador"
+                )
 
         if "email" in dados and dados["email"] != existente.email:
             outro = await self.repo.get_by_email(dados["email"])
             if outro is not None:
-                raise MoradorComEmailJaExiste(f"Email {dados['email']} já pertence a outro morador")
+                raise MoradorComEmailJaExisteError(
+                    f"Email {dados['email']} já pertence a outro morador"
+                )
 
         atualizado = await self.repo.update(morador_id, dados)
         if atualizado is None:
-            raise MoradorNaoEncontrado(f"Morador {morador_id} não encontrado")
+            raise MoradorNaoEncontradoError(f"Morador {morador_id} não encontrado")
         return atualizado
 
     async def remover(self, morador_id: int) -> None:
         removido = await self.repo.delete(morador_id)
         if not removido:
-            raise MoradorNaoEncontrado(f"Morador {morador_id} não encontrado")
+            raise MoradorNaoEncontradoError(f"Morador {morador_id} não encontrado")
