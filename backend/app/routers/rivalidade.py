@@ -7,8 +7,8 @@ from app.database import get_session
 from app.repositories.rivalidade import RivalidadeRepository
 from app.schemas.rivalidade import RivalidadeCreate, RivalidadeRead, RivalidadeUpdate
 from app.services.rivalidade import (
-    NivelInvalido,
-    RivalidadeJaExiste,
+    NivelInvalidoError,
+    RivalidadeJaExisteError,
     RivalidadeNaoEncontradaError,
     RivalidadeService,
 )
@@ -62,7 +62,7 @@ async def criar(
             motivo=data.motivo,
             nivel=data.nivel,
         )
-    except (RivalidadeJaExiste, NivelInvalido) as e:
+    except (RivalidadeJaExisteError, NivelInvalidoError) as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
@@ -92,7 +92,7 @@ async def atualizar(
         return await service.atualizar(rivalidade_id, update_data)
     except RivalidadeNaoEncontradaError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
-    except NivelInvalido as e:
+    except NivelInvalidoError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 

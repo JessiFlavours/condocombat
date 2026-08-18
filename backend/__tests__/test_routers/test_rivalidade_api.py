@@ -11,8 +11,8 @@ from httpx import ASGITransport
 from app.main import app
 from app.routers.rivalidade import _get_service
 from app.services.rivalidade import (
-    NivelInvalido,
-    RivalidadeJaExiste,
+    NivelInvalidoError,
+    RivalidadeJaExisteError,
     RivalidadeNaoEncontradaError,
 )
 
@@ -206,7 +206,7 @@ async def test_criar_422_quando_dados_invalidos(
 async def test_criar_409_quando_rivalidade_ja_existe(
     client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
 ):
-    mock_service.criar.side_effect = RivalidadeJaExiste("já existe")
+    mock_service.criar.side_effect = RivalidadeJaExisteError("já existe")
 
     response = await client.post(
         "/rivalidades/",
@@ -224,7 +224,7 @@ async def test_criar_409_quando_rivalidade_ja_existe(
 async def test_criar_409_quando_nivel_invalido(
     client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
 ):
-    mock_service.criar.side_effect = NivelInvalido("nivel inválido")
+    mock_service.criar.side_effect = NivelInvalidoError("nivel inválido")
 
     response = await client.post(
         "/rivalidades/",
