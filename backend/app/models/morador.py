@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-
-if TYPE_CHECKING:
-    from app.models.apartamento import Apartamento
 
 
 class Morador(Base):
@@ -28,9 +24,9 @@ class Morador(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
+        default=lambda: datetime.now(timezone.utc),
     )
 
-    apartamento: Mapped[Apartamento] = relationship(
+    apartamento: Mapped["Apartamento"] = relationship(  # noqa: F821
         "Apartamento", back_populates="moradores"
     )

@@ -76,7 +76,7 @@ class WSConnectionManager:
         for ws in self._connections:
             try:
                 await ws.send_json(payload)
-            except (RuntimeError, ConnectionError):
+            except Exception:
                 disconnected.append(ws)
         for ws in disconnected:
             self.disconnect(ws)
@@ -88,7 +88,7 @@ class WSConnectionManager:
         payload = message.model_dump(mode="json")
         try:
             await websocket.send_json(payload)
-        except (RuntimeError, ConnectionError):
+        except Exception:
             self.disconnect(websocket)
 
     async def _heartbeat_loop(self, websocket: WebSocket) -> None:
@@ -106,7 +106,7 @@ class WSConnectionManager:
                 ping = WSMessage(type=EventType.PING)
                 try:
                     await websocket.send_json(ping.model_dump(mode="json"))
-                except (RuntimeError, ConnectionError):
+                except Exception:
                     self.disconnect(websocket)
                     break
 

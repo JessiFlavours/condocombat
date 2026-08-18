@@ -5,9 +5,9 @@ from app.database import get_session
 from app.repositories.morador import MoradorRepository
 from app.schemas.morador import MoradorCreate, MoradorRead, MoradorUpdate
 from app.services.morador import (
-    MoradorComCPFJaExisteError,
-    MoradorComEmailJaExisteError,
-    MoradorNaoEncontradoError,
+    MoradorComCPFJaExiste,
+    MoradorComEmailJaExiste,
+    MoradorNaoEncontrado,
     MoradorService,
 )
 
@@ -24,19 +24,15 @@ async def listar_moradores(service: MoradorService = Depends(_get_service)):
 
 
 @router.get("/{morador_id}", response_model=MoradorRead)
-async def obter_morador(
-    morador_id: int, service: MoradorService = Depends(_get_service)
-):
+async def obter_morador(morador_id: int, service: MoradorService = Depends(_get_service)):
     try:
         return await service.buscar(morador_id)
-    except MoradorNaoEncontradoError as e:
+    except MoradorNaoEncontrado as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
 @router.post("/", response_model=MoradorRead, status_code=status.HTTP_201_CREATED)
-async def criar_morador(
-    data: MoradorCreate, service: MoradorService = Depends(_get_service)
-):
+async def criar_morador(data: MoradorCreate, service: MoradorService = Depends(_get_service)):
     try:
         return await service.criar(
             nome=data.nome,
@@ -46,35 +42,26 @@ async def criar_morador(
             tipo=data.tipo,
             apartamento_id=data.apartamento_id,
         )
-    except (MoradorComCPFJaExisteError, MoradorComEmailJaExisteError) as e:
+    except (MoradorComCPFJaExiste, MoradorComEmailJaExiste) as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.put("/{morador_id}", response_model=MoradorRead)
-async def atualizar_morador(
-    morador_id: int,
-    data: MoradorUpdate,
-    service: MoradorService = Depends(_get_service),
-):
+async def atualizar_morador(morador_id: int, data: MoradorUpdate, service: MoradorService = Depends(_get_service)):
     update_data = data.model_dump(exclude_unset=True)
     if not update_data:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Nenhum campo para atualizar",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nenhum campo para atualizar")
     try:
         return await service.atualizar(morador_id, update_data)
-    except MoradorNaoEncontradoError as e:
+    except MoradorNaoEncontrado as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except (MoradorComCPFJaExisteError, MoradorComEmailJaExisteError) as e:
+    except (MoradorComCPFJaExiste, MoradorComEmailJaExiste) as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.delete("/{morador_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remover_morador(
-    morador_id: int, service: MoradorService = Depends(_get_service)
-):
+async def remover_morador(morador_id: int, service: MoradorService = Depends(_get_service)):
     try:
         await service.remover(morador_id)
-    except MoradorNaoEncontradoError as e:
+    except MoradorNaoEncontrado as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

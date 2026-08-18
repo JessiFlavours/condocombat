@@ -4,15 +4,15 @@ from app.repositories.rivalidade import RivalidadeRepository
 NIVEIS = ["leve", "moderado", "intenso", "belico"]
 
 
-class RivalidadeNaoEncontradaError(Exception):
+class RivalidadeNaoEncontrada(Exception):
     pass
 
 
-class RivalidadeJaExisteError(Exception):
+class RivalidadeJaExiste(Exception):
     pass
 
 
-class NivelInvalidoError(Exception):
+class NivelInvalido(Exception):
     pass
 
 
@@ -28,20 +28,16 @@ class RivalidadeService:
         nivel: str = "moderado",
     ) -> Rivalidade:
         if apartamento_a_id == apartamento_b_id:
-            raise RivalidadeJaExisteError(
-                "Não é possível criar rivalidade consigo mesmo"
-            )
+            raise RivalidadeJaExiste("Não é possível criar rivalidade consigo mesmo")
 
         existente = await self.repo.get_between(apartamento_a_id, apartamento_b_id)
         if existente is not None:
-            raise RivalidadeJaExisteError(
+            raise RivalidadeJaExiste(
                 f"Rivalidade entre {apartamento_a_id} e {apartamento_b_id} já existe"
             )
 
         if nivel not in NIVEIS:
-            raise NivelInvalidoError(
-                f"Nível '{nivel}' inválido. Válidos: {', '.join(NIVEIS)}"
-            )
+            raise NivelInvalido(f"Nível '{nivel}' inválido. Válidos: {', '.join(NIVEIS)}")
 
         rivalidade = Rivalidade(
             apartamento_a_id=apartamento_a_id,
@@ -57,9 +53,7 @@ class RivalidadeService:
     async def buscar(self, rivalidade_id: int) -> Rivalidade:
         rivalidade = await self.repo.get_by_id(rivalidade_id)
         if rivalidade is None:
-            raise RivalidadeNaoEncontradaError(
-                f"Rivalidade {rivalidade_id} não encontrada"
-            )
+            raise RivalidadeNaoEncontrada(f"Rivalidade {rivalidade_id} não encontrada")
         return rivalidade
 
     async def listar_por_apartamento(self, apartamento_id: int) -> list[Rivalidade]:
@@ -79,17 +73,13 @@ class RivalidadeService:
     async def atualizar(self, rivalidade_id: int, dados: dict) -> Rivalidade:
         await self.buscar(rivalidade_id)
         if "nivel" in dados and dados["nivel"] not in NIVEIS:
-            raise NivelInvalidoError(f"Nível '{dados['nivel']}' inválido")
+            raise NivelInvalido(f"Nível '{dados['nivel']}' inválido")
         atualizado = await self.repo.update(rivalidade_id, dados)
         if atualizado is None:
-            raise RivalidadeNaoEncontradaError(
-                f"Rivalidade {rivalidade_id} não encontrada"
-            )
+            raise RivalidadeNaoEncontrada(f"Rivalidade {rivalidade_id} não encontrada")
         return atualizado
 
     async def remover(self, rivalidade_id: int) -> None:
         removido = await self.repo.delete(rivalidade_id)
         if not removido:
-            raise RivalidadeNaoEncontradaError(
-                f"Rivalidade {rivalidade_id} não encontrada"
-            )
+            raise RivalidadeNaoEncontrada(f"Rivalidade {rivalidade_id} não encontrada")
