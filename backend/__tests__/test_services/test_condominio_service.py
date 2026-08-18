@@ -8,8 +8,8 @@ from app.models.condominio import Condominio
 from app.repositories.condominio import CondominioRepository
 from app.schemas.condominio import CondominioCreate, CondominioUpdate
 from app.services.condominio import (
-    CondominioJaExisteError,
-    CondominioNaoEncontradoError,
+    CondominioJaExiste,
+    CondominioNaoEncontrado,
     CondominioService,
 )
 
@@ -26,7 +26,9 @@ def service(repo_mock):
 
 class TestCriar:
     async def test_cria_condominio_sem_cnpj(self, service, repo_mock):
-        data = CondominioCreate(nome="Condomínio Teste", endereco="Rua Teste, 100")
+        data = CondominioCreate(
+            nome="Condomínio Teste", endereco="Rua Teste, 100"
+        )
         repo_mock.create.return_value = Condominio(
             id=1, nome="Condomínio Teste", endereco="Rua Teste, 100"
         )
@@ -62,7 +64,7 @@ class TestCriar:
         repo_mock.get_by_cnpj.return_value = Condominio(
             id=1, nome="Existente", endereco="Rua X, 10"
         )
-        with pytest.raises(CondominioJaExisteError) as exc:
+        with pytest.raises(CondominioJaExiste) as exc:
             await service.criar(data)
         assert "12.345.678/0001-90" in str(exc.value)
         repo_mock.create.assert_not_called()
@@ -94,13 +96,15 @@ class TestBuscar:
 
     async def test_lanca_erro_nao_encontrado(self, service, repo_mock):
         repo_mock.get_by_id.return_value = None
-        with pytest.raises(CondominioNaoEncontradoError):
+        with pytest.raises(CondominioNaoEncontrado):
             await service.buscar(999)
 
 
 class TestAtualizar:
     async def test_atualiza_sem_cnpj(self, service, repo_mock):
-        repo_mock.update.return_value = Condominio(id=1, nome="Novo", endereco="Rua X")
+        repo_mock.update.return_value = Condominio(
+            id=1, nome="Novo", endereco="Rua X"
+        )
         data = CondominioUpdate(nome="Novo")
         result = await service.atualizar(1, data)
         assert result.nome == "Novo"
@@ -120,14 +124,14 @@ class TestAtualizar:
             id=2, nome="Outro Cond", endereco="Rua O", cnpj="11.111.111/0001-11"
         )
         data = CondominioUpdate(cnpj="11.111.111/0001-11")
-        with pytest.raises(CondominioJaExisteError):
+        with pytest.raises(CondominioJaExiste):
             await service.atualizar(1, data)
         repo_mock.update.assert_not_called()
 
     async def test_lanca_erro_se_nao_encontrado(self, service, repo_mock):
         repo_mock.update.return_value = None
         data = CondominioUpdate(nome="Novo")
-        with pytest.raises(CondominioNaoEncontradoError):
+        with pytest.raises(CondominioNaoEncontrado):
             await service.atualizar(999, data)
 
 
@@ -139,5 +143,5 @@ class TestRemover:
 
     async def test_lanca_erro_nao_encontrado(self, service, repo_mock):
         repo_mock.delete.return_value = False
-        with pytest.raises(CondominioNaoEncontradoError):
+        with pytest.raises(CondominioNaoEncontrado):
             await service.remover(999)

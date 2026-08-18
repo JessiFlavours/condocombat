@@ -2,7 +2,6 @@
 
 import pytest
 from sqlalchemy.sql.selectable import Select
-import pytest
 
 from app.models.condominio import Condominio
 from app.repositories.condominio import CondominioRepository

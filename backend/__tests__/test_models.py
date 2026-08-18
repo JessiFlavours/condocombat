@@ -1,5 +1,6 @@
 """Tests for SQLAlchemy ORM models — TDD approach."""
 
+import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
