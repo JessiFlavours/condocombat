@@ -8,7 +8,7 @@ import pytest
 from app.repositories.rivalidade import RivalidadeRepository
 from app.services.rivalidade import (
     NivelInvalidoError,
-    RivalidadeJaExiste,
+    RivalidadeJaExisteError,
     RivalidadeNaoEncontradaError,
     RivalidadeService,
 )
@@ -55,7 +55,8 @@ class TestCriar:
         self, service: RivalidadeService, repo: MagicMock
     ) -> None:
         with pytest.raises(
-            RivalidadeJaExiste, match="Não é possível criar rivalidade consigo mesmo"
+            RivalidadeJaExisteError,
+            match="Não é possível criar rivalidade consigo mesmo",
         ):
             await service.criar(101, 101)
         repo.create.assert_not_called()
@@ -64,7 +65,7 @@ class TestCriar:
         self, service: RivalidadeService, repo: MagicMock
     ) -> None:
         repo.get_between = AsyncMock(return_value=MagicMock())
-        with pytest.raises(RivalidadeJaExiste):
+        with pytest.raises(RivalidadeJaExisteError):
             await service.criar(101, 102)
         repo.create.assert_not_called()
 
