@@ -72,26 +72,26 @@ class WSConnectionManager:
             info.last_pong = time.monotonic()
 
     async def broadcast(self, message: WSMessage) -> None:
-        """Envia mensagem para todas as conexões ativas."""
-        payload = message.model_dump(mode="json")
-        disconnected: list[WebSocket] = []
-        for ws in self._connections:
-            try:
-                await ws.send_json(payload)
-            except Exception:
-                disconnected.append(ws)
-        for ws in disconnected:
-            self.disconnect(ws)
+    """Envia mensagem para todas as conexões ativas."""
+    payload = message.model_dump(mode="json")
+    disconnected: list[WebSocket] = []
+    for ws in self._connections:
+        try:
+            await ws.send_json(payload)
+        except (RuntimeError, ConnectionError):
+            disconnected.append(ws)
+    for ws in disconnected:
+        self.disconnect(ws)
 
     async def send_personal(
-        self, message: WSMessage, websocket: WebSocket
-    ) -> None:
-        """Envia mensagem para uma conexão específica."""
-        payload = message.model_dump(mode="json")
-        try:
-            await websocket.send_json(payload)
-        except Exception:
-            self.disconnect(websocket)
+    self, message: WSMessage, websocket: WebSocket
+) -> None:
+    """Envia mensagem para uma conexão específica."""
+    payload = message.model_dump(mode="json")
+    try:
+        await websocket.send_json(payload)
+    except (RuntimeError, ConnectionError):
+        self.disconnect(websocket)
 
     async def _heartbeat_loop(self, websocket: WebSocket) -> None:
         """Envia ping periódico e desconecta se não receber PONG."""
@@ -108,7 +108,7 @@ class WSConnectionManager:
                 ping = WSMessage(type=EventType.PING)
                 try:
                     await websocket.send_json(ping.model_dump(mode="json"))
-                except Exception:
+                except (RuntimeError, ConnectionError):
                     self.disconnect(websocket)
                     break
 
