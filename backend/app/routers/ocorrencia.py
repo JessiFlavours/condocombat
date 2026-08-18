@@ -23,8 +23,10 @@ async def _get_service(
     return OcorrenciaService(OcorrenciaRepository(session))
 
 
-async def _broadcast_event(event_type: EventType, data: dict) -> None:
-    message = WSMessage(type=event_type, data=data)
+async def _broadcast_event(
+    event_type: EventType, data: dict, ocorrencia_id: int | None = None
+) -> None:
+    message = WSMessage(type=event_type, data=data, ocorrencia_id=ocorrencia_id)
     await manager.broadcast(message)
 
 

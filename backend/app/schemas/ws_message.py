@@ -20,3 +20,4 @@ class WSMessage(BaseModel):
     type: EventType
     data: dict | None = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    ocorrencia_id: int | None = None
