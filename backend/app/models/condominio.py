@@ -25,6 +25,6 @@ class Condominio(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    apartamentos: Mapped[list["Apartamento"]] = relationship(
+    apartamentos: Mapped[list["Apartamento"]] = relationship(  # noqa: F821
         "Apartamento", back_populates="condominio"
     )

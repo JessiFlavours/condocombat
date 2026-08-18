@@ -35,6 +35,6 @@ class Ocorrencia(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    apartamento_origem: Mapped["Apartamento"] = relationship(
+    apartamento_origem: Mapped["Apartamento"] = relationship(  # noqa: F821
         "Apartamento", backref="ocorrencias"
     )
