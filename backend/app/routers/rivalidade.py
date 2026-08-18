@@ -7,16 +7,18 @@ from app.database import get_session
 from app.repositories.rivalidade import RivalidadeRepository
 from app.schemas.rivalidade import RivalidadeCreate, RivalidadeRead, RivalidadeUpdate
 from app.services.rivalidade import (
-    NivelInvalido,
-    RivalidadeJaExiste,
-    RivalidadeNaoEncontrada,
+    NivelInvalidoError,
+    RivalidadeJaExisteError,
+    RivalidadeNaoEncontradaError,
     RivalidadeService,
 )
 
 router = APIRouter(prefix="/rivalidades", tags=["rivalidades"])
 
 
-async def _get_service(session: AsyncSession = Depends(get_session)) -> RivalidadeService:
+async def _get_service(
+    session: AsyncSession = Depends(get_session),
+) -> RivalidadeService:
     return RivalidadeService(RivalidadeRepository(session))
 
 
@@ -45,12 +47,14 @@ async def top(
 async def obter(rivalidade_id: int, service: RivalidadeService = Depends(_get_service)):
     try:
         return await service.buscar(rivalidade_id)
-    except RivalidadeNaoEncontrada as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except RivalidadeNaoEncontradaError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.post("/", response_model=RivalidadeRead, status_code=status.HTTP_201_CREATED)
-async def criar(data: RivalidadeCreate, service: RivalidadeService = Depends(_get_service)):
+async def criar(
+    data: RivalidadeCreate, service: RivalidadeService = Depends(_get_service)
+):
     try:
         return await service.criar(
             apartamento_a_id=data.apartamento_a_id,
@@ -58,16 +62,18 @@ async def criar(data: RivalidadeCreate, service: RivalidadeService = Depends(_ge
             motivo=data.motivo,
             nivel=data.nivel,
         )
-    except (RivalidadeJaExiste, NivelInvalido) as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except (RivalidadeJaExisteError, NivelInvalidoError) as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
 @router.post("/{rivalidade_id}/escalar", response_model=RivalidadeRead)
-async def escalar(rivalidade_id: int, service: RivalidadeService = Depends(_get_service)):
+async def escalar(
+    rivalidade_id: int, service: RivalidadeService = Depends(_get_service)
+):
     try:
         return await service.escalar(rivalidade_id)
-    except RivalidadeNaoEncontrada as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except RivalidadeNaoEncontradaError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.put("/{rivalidade_id}", response_model=RivalidadeRead)
@@ -84,15 +90,17 @@ async def atualizar(
         )
     try:
         return await service.atualizar(rivalidade_id, update_data)
-    except RivalidadeNaoEncontrada as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NivelInvalido as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except RivalidadeNaoEncontradaError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+    except NivelInvalidoError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
 @router.delete("/{rivalidade_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remover(rivalidade_id: int, service: RivalidadeService = Depends(_get_service)):
+async def remover(
+    rivalidade_id: int, service: RivalidadeService = Depends(_get_service)
+):
     try:
         await service.remover(rivalidade_id)
-    except RivalidadeNaoEncontrada as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except RivalidadeNaoEncontradaError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
