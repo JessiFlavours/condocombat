@@ -11,7 +11,10 @@ class Apartamento(Base):
 
     __table_args__ = (
         UniqueConstraint(
-            "numero", "bloco", "torre", "condominio_id",
+            "numero",
+            "bloco",
+            "torre",
+            "condominio_id",
             name="uq_apartamento_identificacao",
         ),
     )

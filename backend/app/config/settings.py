@@ -26,9 +26,16 @@ class Settings(BaseSettings):
     def build_database_url(self) -> "Settings":
         if self.DATABASE_URL:
             parsed = urlparse(self.DATABASE_URL)
-            if parsed.scheme in {"postgres", "postgresql"} and "+asyncpg" not in self.DATABASE_URL:
-                self.DATABASE_URL = self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
-                self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+            if (
+                parsed.scheme in {"postgres", "postgresql"}
+                and "+asyncpg" not in self.DATABASE_URL
+            ):
+                self.DATABASE_URL = self.DATABASE_URL.replace(
+                    "postgresql://", "postgresql+asyncpg://", 1
+                )
+                self.DATABASE_URL = self.DATABASE_URL.replace(
+                    "postgres://", "postgresql+asyncpg://", 1
+                )
         else:
             self.DATABASE_URL = (
                 f"postgresql+asyncpg://{quote_plus(self.DB_USER)}:"

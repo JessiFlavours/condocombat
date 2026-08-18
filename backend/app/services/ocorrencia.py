@@ -9,16 +9,16 @@ STATUS_VALIDAS: dict[str, set[str]] = {
 }
 
 
-class OcorrenciaNaoEncontrada(Exception):
+class OcorrenciaNaoEncontradaError(Exception):
     pass
 
 
-class TransicaoStatusInvalida(Exception):
+class TransicaoStatusInvalidaError(Exception):
     pass
 
 
 class OcorrenciaService:
-    EXCEPCOES = (OcorrenciaNaoEncontrada, TransicaoStatusInvalida)
+    EXCEPCOES = (OcorrenciaNaoEncontradaError, TransicaoStatusInvalidaError)
 
     def __init__(self, repo: OcorrenciaRepository) -> None:
         self.repo = repo
@@ -54,17 +54,21 @@ class OcorrenciaService:
     async def buscar(self, ocorrencia_id: int) -> Ocorrencia:
         ocorrencia = await self.repo.get_by_id(ocorrencia_id)
         if ocorrencia is None:
-            raise OcorrenciaNaoEncontrada(f"Ocorrência {ocorrencia_id} não encontrada")
+            raise OcorrenciaNaoEncontradaError(
+                f"Ocorrência {ocorrencia_id} não encontrada"
+            )
         return ocorrencia
 
     async def listar_recentes(self) -> list[Ocorrencia]:
         return await self.repo.list_recentes()
 
-    async def atualizar_status(self, ocorrencia_id: int, novo_status: str) -> Ocorrencia:
+    async def atualizar_status(
+        self, ocorrencia_id: int, novo_status: str
+    ) -> Ocorrencia:
         ocorrencia = await self.buscar(ocorrencia_id)
         transicoes = STATUS_VALIDAS.get(ocorrencia.status, set())
         if novo_status not in transicoes:
-            raise TransicaoStatusInvalida(
+            raise TransicaoStatusInvalidaError(
                 f"Não é permitido mudar de '{ocorrencia.status}' para '{novo_status}'"
             )
         return await self.repo.update(ocorrencia_id, {"status": novo_status})
@@ -75,10 +79,14 @@ class OcorrenciaService:
             return await self.atualizar_status(ocorrencia_id, dados["status"])
         atualizado = await self.repo.update(ocorrencia_id, dados)
         if atualizado is None:
-            raise OcorrenciaNaoEncontrada(f"Ocorrência {ocorrencia_id} não encontrada")
+            raise OcorrenciaNaoEncontradaError(
+                f"Ocorrência {ocorrencia_id} não encontrada"
+            )
         return atualizado
 
     async def remover(self, ocorrencia_id: int) -> None:
         removido = await self.repo.delete(ocorrencia_id)
         if not removido:
-            raise OcorrenciaNaoEncontrada(f"Ocorrência {ocorrencia_id} não encontrada")
+            raise OcorrenciaNaoEncontradaError(
+                f"Ocorrência {ocorrencia_id} não encontrada"
+            )

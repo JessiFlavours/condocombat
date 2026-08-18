@@ -20,6 +20,7 @@ ignore = [
     "E501",   # line-length (handled separately)
     "E741",   # ambiguous variable name
     "W505",   # long lines
+    "B008",
 ]
 
 [tool.ruff.lint.isort]
